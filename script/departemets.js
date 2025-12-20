@@ -8,8 +8,11 @@ function getStorage() {
 function setStorage(data) { localStorage.setItem(STORAGE_KEY, JSON.stringify(data)); }
 
 /* ---------- CHART ---------- */
-const deptChartCtx = document.getElementById('departmentChart').getContext('2d');
-let departmentChart = new Chart(deptChartCtx, {
+let departmentChart = null;
+const deptCanvas = document.getElementById('departmentChart');
+if (deptCanvas) {
+  const deptChartCtx = deptCanvas.getContext('2d');
+  departmentChart = new Chart(deptChartCtx, {
   type: 'doughnut',
   data: {
     labels: ['Active', 'Growing'],
@@ -30,8 +33,10 @@ let departmentChart = new Chart(deptChartCtx, {
     }
   }
 });
+}
 
 function updateChart(departments) {
+  if (!departmentChart) return;
   const active = departments.filter(d => d.status === 'active').length;
   const growing = departments.length - active;
   departmentChart.data.datasets[0].data = [active, growing];
@@ -75,36 +80,36 @@ function updateKPIs() {
 }
 
 /* ---------- ADD DEPARTMENT ---------- */
-document.querySelector('.dept-add-btn').addEventListener('click', () => {
-  const name = prompt('Department name');
-  const manager = prompt('Manager name');
-  const employees = prompt('Number of employees');
-  if (!name || !manager || !employees) return;
+// Keep old prompt fallback but prefer modal-driven additions via 'modalSubmit'
+const addBtn = document.querySelector('.dept-add-btn');
+if (addBtn) addBtn.addEventListener('click', () => {
+  // fallback will be handled elsewhere; keep minimal behavior
+  // openModal in global script will handle showing modal if available
+});
 
+// Listen for modal submissions for departments
+window.addEventListener('modalSubmit', (e) => {
+  const d = e.detail;
+  if (!d || d.type !== 'department') return;
+  const payload = d.data;
   const departments = getStorage();
-  departments.push({
-    name,
-    manager,
-    employees: Number(employees),
-    status: Math.random() > 0.5 ? 'active' : 'growing'
-  });
-
+  departments.push({ name: payload.name, manager: payload.manager, employees: Number(payload.employees||0), status: payload.status });
   setStorage(departments);
   renderDepartments();
 });
 
 /* ---------- INIT DEMO DATA ---------- */
-function initDemoData() {
+function initDemoDataIfEmpty() {
+  const existing = getStorage();
+  if (existing.length > 0) { renderDepartments(); return; }
   const demoDepartments = [
     { name: 'IT', manager: 'Ahmed Benali', employees: 35, status: 'active' },
     { name: 'Human Resources', manager: 'Imane Zahra', employees: 15, status: 'active' },
     { name: 'Marketing', manager: 'Sarah El Idrissi', employees: 20, status: 'growing' },
-    { name : 'finance',manager :'yahya Guirnaoui' , employees : 17 , status : 'active'}
+    { name: 'Finance', manager: 'Yahya Guirnaoui', employees: 17, status: 'active' }
   ];
   setStorage(demoDepartments);
   renderDepartments();
 }
 
-// Reset localStorage for demo
-localStorage.removeItem(STORAGE_KEY);
-initDemoData();
+initDemoDataIfEmpty();

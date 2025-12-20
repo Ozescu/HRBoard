@@ -64,16 +64,28 @@ document.addEventListener('DOMContentLoaded', () => {
     if(kpis.length>=2){ kpis[0].textContent = total; kpis[1].textContent = activeCount; }
   }
 
-  // Add employee
-  document.querySelector('.emp-add-btn').addEventListener('click', () => {
+  // Add employee: modal handled in global script; keep fallback function available but not auto-invoked
+
+  // If modal isn't available, fallback to prompts
+  function openModalFallback(){
     const firstName = prompt('First Name');
     const lastName = prompt('Last Name');
     const department = prompt('Department');
     const status = prompt('Status (active/inactive)').toLowerCase();
     if(!firstName || !lastName || (status!=='active' && status!=='inactive')) return alert('Invalid input');
-
     const employees = getStorage();
     employees.push({firstName, lastName, department, status});
+    setStorage(employees);
+    renderEmployees();
+  }
+
+  // Listen for modal submissions
+  window.addEventListener('modalSubmit', (e) => {
+    const d = e.detail;
+    if (!d || d.type !== 'employee') return;
+    const payload = d.data;
+    const employees = getStorage();
+    employees.push({ firstName: payload.firstName, lastName: payload.lastName, department: payload.department, status: payload.status });
     setStorage(employees);
     renderEmployees();
   });
@@ -90,13 +102,17 @@ document.addEventListener('DOMContentLoaded', () => {
     renderEmployees();
   });
 
-  // Demo employees
-  const demo = [
-    {firstName:'John', lastName:'Doe', department:'IT', status:'active'},
-    {firstName:'Jane', lastName:'Smith', department:'HR', status:'inactive'},
-    {firstName:'Alice', lastName:'Brown', department:'Marketing', status:'active'}
-  ];
-  setStorage(demo);
-  renderEmployees();
+  // Init demo employees only if none exist
+  (function initDemoIfEmpty(){
+    const existing = getStorage();
+    if (existing.length > 0) { renderEmployees(); return; }
+    const demo = [
+      {firstName:'John', lastName:'Doe', department:'IT', status:'active'},
+      {firstName:'Jane', lastName:'Smith', department:'HR', status:'inactive'},
+      {firstName:'Alice', lastName:'Brown', department:'Marketing', status:'active'}
+    ];
+    setStorage(demo);
+    renderEmployees();
+  })();
 
 });

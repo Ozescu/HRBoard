@@ -19,87 +19,39 @@ document.addEventListener('DOMContentLoaded', () => {
     localStorage.setItem(key, JSON.stringify(data));
   }
 
-  // ----- DEPARTMENTS -----
-  const ctxDept = document.getElementById('departmentChart').getContext('2d');
-  let departmentChart = new Chart(ctxDept, {
-    type: 'doughnut',
-    data: { labels:['Active','Growing'], datasets:[{data:[0,0], backgroundColor:['#16a34a','#f59e0b'], borderWidth:1}] },
-    options: { responsive:true, maintainAspectRatio:false, plugins:{ legend:{ position:'bottom', labels:{ font:{size:12}, boxWidth:12 } } } }
-  });
-
-  function renderDepartments() {
-    const departments = getStorage(STORAGE_KEYS.departments);
-    const tbody = document.querySelector('.dept-table tbody');
-    tbody.innerHTML = '';
-    departments.forEach((d,i)=>{
-      const tr = document.createElement('tr');
-      tr.dataset.index = i;
-      tr.innerHTML = `
-        <td>${d.name}</td>
-        <td>${d.manager}</td>
-        <td>${d.employees}</td>
-        <td class="${d.status==='active'?'dept-status-active':'dept-status-growing'}">
-          <i class="fa-solid ${d.status==='active'?'fa-check':'fa-clock'}"></i> ${d.status}
-        </td>
-      `;
-      tbody.appendChild(tr);
-    });
-    updateDepartmentsKPIs();
-    updateDepartmentChart();
-  }
-
-  function updateDepartmentChart() {
-    const departments = getStorage(STORAGE_KEYS.departments);
-    const active = departments.filter(d=>d.status==='active').length;
-    const growing = departments.length - active;
-    departmentChart.data.datasets[0].data = [active,growing];
-    departmentChart.update();
-  }
-
-  function updateDepartmentsKPIs() {
-    const departments = getStorage(STORAGE_KEYS.departments);
-    const totalEmployees = departments.reduce((sum,d)=>sum+d.employees,0);
-    const kpis = document.querySelectorAll('.dept-kpi-content p');
-    if(kpis.length>=2){
-      kpis[0].textContent = departments.length;
-      kpis[1].textContent = totalEmployees;
+  // Listen for modal submissions for interviews, tasks, meetings
+  window.addEventListener('modalSubmit', (e) => {
+    const d = e.detail;
+    if (!d) return;
+    const type = d.type;
+    if (type === 'interview'){
+      const payload = d.data;
+      const interviews = getStorage(STORAGE_KEYS.interviews);
+      interviews.push({ firstName: payload.firstName, lastName: payload.lastName, department: payload.department, status: payload.status });
+      setStorage(STORAGE_KEYS.interviews, interviews);
+      renderInterviews();
+    } else if (type === 'task'){
+      const payload = d.data;
+      const tasks = getStorage(STORAGE_KEYS.tasks);
+      tasks.push({ task: payload.task, assignedTo: payload.assignedTo, dueDate: payload.dueDate, status: payload.status });
+      setStorage(STORAGE_KEYS.tasks, tasks);
+      renderTasks();
+    } else if (type === 'meeting'){
+      const payload = d.data;
+      const meetings = getStorage(STORAGE_KEYS.meetings);
+      meetings.push(payload);
+      setStorage(STORAGE_KEYS.meetings, meetings);
+      // Append to table if present
+      const tbody = document.getElementById('meetingsTableBody');
+      if (tbody) {
+        const tr = document.createElement('tr');
+        tr.innerHTML = `<td>${payload.meeting}</td><td>${payload.date}</td><td>${payload.time}</td><td>${payload.location}</td>`;
+        tbody.appendChild(tr);
+      }
     }
-  }
-
-  document.querySelector('.dept-add-btn').addEventListener('click', ()=>{
-    const name = prompt('Department name');
-    const manager = prompt('Manager name');
-    const employees = prompt('Number of employees');
-    const status = prompt('Status (active/growing)').toLowerCase();
-    if(!name || !manager || !employees || (status!=='active' && status!=='growing')) return alert('Invalid input');
-    const departments = getStorage(STORAGE_KEYS.departments);
-    departments.push({name, manager, employees:Number(employees), status});
-    setStorage(STORAGE_KEYS.departments, departments);
-    renderDepartments();
   });
 
-  document.querySelector('.dept-table tbody').addEventListener('click', e=>{
-    const td = e.target.closest('td');
-    if(!td || td.cellIndex !== 3) return;
-    const tr = td.parentElement;
-    const index = Number(tr.dataset.index);
-    const departments = getStorage(STORAGE_KEYS.departments);
-    departments[index].status = departments[index].status==='active'?'growing':'active';
-    setStorage(STORAGE_KEYS.departments, departments);
-    renderDepartments();
-  });
-
-  function initDemoDepartments(){
-    const demo = [
-      {name:'IT', manager:'Ahmed Benali', employees:35, status:'active'},
-      {name:'HR', manager:'Imane Zahra', employees:15, status:'active'},
-      {name:'Marketing', manager:'Sarah El Idrissi', employees:20, status:'growing'}
-    ];
-    setStorage(STORAGE_KEYS.departments, demo);
-    renderDepartments();
-  }
-
-  initDemoDepartments();
+  // Departments rendering and demo data handled in script/departemets.js
 
   // ----- INTERVIEWS -----
   const ctxInterview = document.getElementById('interviewChart').getContext('2d');
@@ -150,6 +102,31 @@ document.addEventListener('DOMContentLoaded', () => {
     options:{ responsive:true, maintainAspectRatio:false, plugins:{ legend:{ position:'bottom', labels:{ font:{size:11}, boxWidth:12 } } } }
   });
 
+  // ----- ADDITIONAL ANALYTICS CHARTS -----
+  // Employee growth (line)
+  let employeeGrowthChart = null;
+  const empGrowthCanvas = document.getElementById('employeeGrowthChart');
+  if (empGrowthCanvas) {
+    const ctxEmp = empGrowthCanvas.getContext('2d');
+    employeeGrowthChart = new Chart(ctxEmp, { type: 'line', data: { labels: [], datasets: [{ label: 'Employees', data: [], borderColor: '#3b82f6', backgroundColor: 'rgba(59,130,246,0.08)', tension: 0.3 }] }, options: { responsive:true, maintainAspectRatio:false, plugins:{ legend:{ display:false } } } });
+  }
+
+  // Departments bar chart
+  let departmentBarChart = null;
+  const deptBarCanvas = document.getElementById('departmentBarChart');
+  if (deptBarCanvas) {
+    const ctxDeptBar = deptBarCanvas.getContext('2d');
+    departmentBarChart = new Chart(ctxDeptBar, { type: 'bar', data: { labels: [], datasets: [{ label: 'Employees', data: [], backgroundColor: '#10b981' }] }, options: { responsive:true, maintainAspectRatio:false, plugins:{ legend:{ display:false } }, scales:{ y:{ beginAtZero:true } } } });
+  }
+
+  // KPI radar
+  let kpiRadarChart = null;
+  const kpiCanvas = document.getElementById('kpiRadarChart');
+  if (kpiCanvas) {
+    const ctxKpi = kpiCanvas.getContext('2d');
+    kpiRadarChart = new Chart(ctxKpi, { type: 'radar', data: { labels: ['Employees','Departments','Interviews','Tasks','Meetings'], datasets: [{ label:'Overview', data: [], backgroundColor: 'rgba(79,70,229,0.12)', borderColor:'#4f46e5' }] }, options: { responsive:true, maintainAspectRatio:false, plugins: { legend:{ display:false } } } });
+  }
+
   function renderTasks(){
     const stored = getStorage(STORAGE_KEYS.tasks);
     const tbody = document.getElementById('tasksTableBody');
@@ -171,6 +148,47 @@ document.addEventListener('DOMContentLoaded', () => {
     taskChart.data.datasets[0].data = [completed,pending];
     taskChart.update();
   }
+
+  // ----- ADDITIONAL UPDATE HELPERS -----
+  function updateEmployeeGrowth(){
+    if (!employeeGrowthChart) return;
+    const employees = getStorage(STORAGE_KEYS.employees) || [];
+    const total = employees.length;
+    // build 6-point trend ending at total
+    const points = 6;
+    const data = [];
+    for (let i=points-1;i>=0;i--){
+      const val = Math.max(0, Math.round(total - (i * (total/points)) + (Math.random()*2 -1)));
+      data.push(val);
+    }
+    const labels = Array.from({length:points}, (_,i)=>`${i+1}m`);
+    employeeGrowthChart.data.labels = labels;
+    employeeGrowthChart.data.datasets[0].data = data;
+    employeeGrowthChart.update();
+  }
+
+  function updateDepartmentBar(){
+    if (!departmentBarChart) return;
+    const deps = getStorage(STORAGE_KEYS.departments) || [];
+    const labels = deps.map(d=>d.name || '—');
+    const data = deps.map(d=>Number(d.employees||0));
+    departmentBarChart.data.labels = labels;
+    departmentBarChart.data.datasets[0].data = data;
+    departmentBarChart.update();
+  }
+
+  function updateKpiRadar(){
+    if (!kpiRadarChart) return;
+    const employees = getStorage(STORAGE_KEYS.employees) || [];
+    const departments = getStorage(STORAGE_KEYS.departments) || [];
+    const interviews = getStorage(STORAGE_KEYS.interviews) || [];
+    const tasks = getStorage(STORAGE_KEYS.tasks) || [];
+    const meetings = getStorage(STORAGE_KEYS.meetings) || [];
+    kpiRadarChart.data.datasets[0].data = [employees.length, departments.length, interviews.length, tasks.length, meetings.length];
+    kpiRadarChart.update();
+  }
+
+  function updateAllAnalytics(){ updateEmployeeGrowth(); updateDepartmentBar(); updateKpiRadar(); }
 
   document.getElementById('tasksTableBody').addEventListener('click', e=>{
     const td = e.target.closest('td');
@@ -204,6 +222,22 @@ document.addEventListener('DOMContentLoaded', () => {
     renderTasks();
   }
 
-  initDemoInterviewsTasks();
+  // Initialize demo interviews/tasks only when storage empty
+  (function initDemoInterviewsTasksIfEmpty(){
+    const interviews = getStorage(STORAGE_KEYS.interviews);
+    const tasks = getStorage(STORAGE_KEYS.tasks);
+    if ((interviews && interviews.length>0) || (tasks && tasks.length>0)) {
+      renderInterviews();
+      renderTasks();
+      return;
+    }
+    initDemoInterviewsTasks();
+  })();
+
+  // update analytics initially
+  updateAllAnalytics();
+
+  // update analytics on modal submits (employee/department/interview/task/meeting)
+  window.addEventListener('modalSubmit', (e)=>{ if(!e.detail) return; const t=e.detail.type; if(['employee','department','interview','task','meeting'].includes(t)) setTimeout(updateAllAnalytics,150); });
 
 });
