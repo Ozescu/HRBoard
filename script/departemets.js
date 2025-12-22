@@ -1,4 +1,11 @@
-/* ---------- STORAGE ---------- */
+/*
+  Fichier: departemets.js
+  Rôle: gestion du stockage local (localStorage) pour les départements, rendu du
+  tableau des départements, mise à jour des KPI et du graphique en doughnut
+  représentant les départements actifs vs en croissance. Les commentaires
+  inline ont été supprimés; description générale ci-dessus.
+*/
+
 const STORAGE_KEY = 'hrboard_departments';
 
 function getStorage() {
@@ -7,7 +14,6 @@ function getStorage() {
 }
 function setStorage(data) { localStorage.setItem(STORAGE_KEY, JSON.stringify(data)); }
 
-/* ---------- CHART ---------- */
 let departmentChart = null;
 const deptCanvas = document.getElementById('departmentChart');
 if (deptCanvas) {
@@ -43,7 +49,6 @@ function updateChart(departments) {
   departmentChart.update();
 }
 
-/* ---------- RENDER TABLE ---------- */
 const tableBody = document.querySelector('.dept-table tbody');
 function renderDepartments() {
   const departments = getStorage();
@@ -67,7 +72,6 @@ function renderDepartments() {
   updateChart(departments);
 }
 
-/* ---------- KPI ---------- */
 function updateKPIs() {
   const departments = getStorage();
   const totalDepartments = departments.length;
@@ -79,15 +83,9 @@ function updateKPIs() {
   }
 }
 
-/* ---------- ADD DEPARTMENT ---------- */
-// Keep old prompt fallback but prefer modal-driven additions via 'modalSubmit'
 const addBtn = document.querySelector('.dept-add-btn');
-if (addBtn) addBtn.addEventListener('click', () => {
-  // fallback will be handled elsewhere; keep minimal behavior
-  // openModal in global script will handle showing modal if available
-});
+if (addBtn) addBtn.addEventListener('click', () => {});
 
-// Listen for modal submissions for departments
 window.addEventListener('modalSubmit', (e) => {
   const d = e.detail;
   if (!d || d.type !== 'department') return;
@@ -98,7 +96,6 @@ window.addEventListener('modalSubmit', (e) => {
   renderDepartments();
 });
 
-/* ---------- INIT DEMO DATA ---------- */
 function initDemoDataIfEmpty() {
   const existing = getStorage();
   if (existing.length > 0) { renderDepartments(); return; }

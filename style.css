@@ -1,6 +1,9 @@
-/* ========================
-   Base styles & layout
-======================== */
+/*
+  Fichier: style.css
+  Rôle: styles globaux pour HRBoard — layout, sidebar, cartes KPI, tableaux,
+  formulaires/modal et sections (employees, departments, stats). Les commentaires
+  inline ont été supprimés; description générale ci-dessus.
+*/
 body {
   margin: 0;
   font-family: 'Inter', sans-serif;
@@ -22,9 +25,6 @@ a {
   display: block;
 }
 
-/* ========================
-   Sidebar
-======================== */
 .sidebar {
   width: 220px;
   height: 100vh;
@@ -73,29 +73,21 @@ a {
 .user-info { display:flex; flex-direction:column; font-size:12px; color:#cbd5e1; }
 .user-name { font-weight:600; color:#fff; }
 
-/* collapsed variations */
 .sidebar.collapsed .brand-name, .sidebar.collapsed .nav a span, .sidebar.collapsed .user-info { display:none; }
 .sidebar.collapsed .brand-logo { margin: 0 auto; }
 .sidebar.collapsed .nav { padding-top: 10px; }
 
-/* small screens */
 @media (max-width: 768px) {
   .sidebar { transform: translateX(-100%); }
   .sidebar.open { transform: translateX(0); }
 }
 
-/* ========================
-   Main content
-======================== */
 .content {
   margin-left: 220px;
   padding: 18px; /* tighter padding */
   flex: 1;
 }
 
-/* ========================
-   KPI Cards
-======================== */
 .kpi-container {
   display: flex;
   gap: 12px;
@@ -144,7 +136,6 @@ a {
   color: rgba(255,255,255,0.8);
 }
 
-/* Gradient backgrounds */
 .gradient-1 { background: linear-gradient(135deg, #3b82f6, #2563eb); }
 .gradient-2 { background: linear-gradient(135deg, #16a34a, #22c55e); }
 .gradient-3 { background: linear-gradient(135deg, #f59e0b, #facc15); }
@@ -346,6 +337,7 @@ a {
 }
 
 /* blur main content when modal open */
+
 .content.modal-open { filter: blur(3px) brightness(0.95); pointer-events: none; }
 
 @media (max-width: 520px) {
@@ -356,15 +348,12 @@ a {
 /* subtle divider between columns */
 .modern-table th:not(:last-child), .modern-table td:not(:last-child) { border-right: 1px solid rgba(15,23,42,0.03); }
 
-/* small empty state styling for compact rows */
 .modern-table td span.small { color: rgba(15,23,42,0.6); font-size: 11px; }
 
-/* align every second table-container to remove extra right margin */
 .table-container:nth-of-type(2n) {
   margin-right: 0;
 }
 
-/* make tables stack on smaller screens */
 @media (max-width: 1024px) {
   .table-container {
     width: 100%;
@@ -372,13 +361,12 @@ a {
   }
 }
 
-/* Row wrapper to force two tables side-by-side without wrapping */
 .tables-row {
   display: flex;
   gap: 12px;
   align-items: flex-start;
   justify-content: space-between;
-  flex-wrap: nowrap; /* prevent wrapping for these two */
+  flex-wrap: nowrap;
   margin-bottom: 12px;
 }
 
@@ -396,9 +384,6 @@ a {
   }
 }
 
-/* ========================
-   Responsive
-======================== */
 @media (max-width: 1024px) {
   .kpi-container, .charts-container {
     flex-wrap: wrap;
@@ -407,6 +392,105 @@ a {
     flex: 1 1 45%;
   }
 }
+
+/* =========================
+   DEPARTMENTS SECTION
+========================= */
+
+.dept-section {
+  padding: 25px;
+  animation: deptFade 0.4s ease-in-out;
+}
+
+.dept-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.dept-header h1 {
+  font-size: 22px;
+  color: #1e293b;
+  display: flex;
+  gap: 10px;
+  align-items: center;
+}
+
+.dept-header i { color: #2563eb; }
+
+.dept-add-btn {
+  background: linear-gradient(135deg, #2563eb, #1d4ed8);
+  color: #fff;
+  border: none;
+  padding: 10px 14px;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.dept-add-btn:hover { transform: translateY(-2px); box-shadow: 0 8px 20px rgba(37,99,235,0.18); }
+
+.dept-kpi-wrapper {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 16px;
+  margin-bottom: 20px;
+}
+
+.dept-kpi-card { display:flex; gap:12px; padding:16px; border-radius:12px; color:#fff; box-shadow:0 8px 24px rgba(2,6,23,0.06); }
+.dept-gradient-primary { background: linear-gradient(135deg, #4f46e5, #2563eb); }
+.dept-gradient-success { background: linear-gradient(135deg, #059669, #10b981); }
+.dept-kpi-content h3 { margin:0; font-size:15px; }
+.dept-kpi-content p { margin:6px 0; font-size:22px; font-weight:700; }
+
+.dept-table-box { background:#fff; padding:18px; border-radius:14px; box-shadow:0 10px 30px rgba(0,0,0,0.06); }
+.dept-table { width:100%; border-collapse:collapse; }
+.dept-table thead { background:#f1f5f9; }
+.dept-table th, .dept-table td { padding:12px 14px; font-size:14px; text-align:left; }
+.dept-table tbody tr { border-bottom:1px solid #e5e7eb; }
+.dept-table tbody tr:hover { background:#f8fafc; }
+
+.dept-status-active { color:#16a34a; font-weight:600; }
+.dept-status-growing { color:#d97706; font-weight:600; }
+.dept-status-active i, .dept-status-growing i { margin-right:6px; }
+
+@keyframes deptFade { from { opacity:0; transform:translateY(12px); } to { opacity:1; transform:translateY(0); } }
+
+@media (max-width: 768px) { .dept-header { flex-direction:column; align-items:flex-start; gap:10px; } }
+
+/* ---------- EMPLOYEES SECTION ---------- */
+.emp-section {
+  padding: 20px;
+  background-color: #f9fafb;
+  border-radius: 12px;
+}
+
+.emp-header { display:flex; justify-content:space-between; align-items:center; margin-bottom:14px; }
+.emp-header h1 { font-size:20px; display:flex; gap:8px; align-items:center; }
+.emp-add-btn { background:#3b82f6; color:#fff; padding:8px 12px; border-radius:8px; border:none; cursor:pointer; font-weight:600; }
+.emp-add-btn:hover { background:#2563eb; }
+
+.emp-kpi-wrapper { display:flex; gap:12px; margin-bottom:12px; }
+.emp-kpi-card { flex:1; display:flex; align-items:center; padding:12px; border-radius:10px; color:#fff; }
+.emp-gradient-primary { background: linear-gradient(135deg, #3b82f6, #60a5fa); }
+.emp-gradient-success { background: linear-gradient(135deg, #16a34a, #4ade80); }
+.emp-kpi-card i { font-size:22px; margin-right:10px; }
+.emp-kpi-content h3 { margin:0; font-size:14px; }
+.emp-kpi-content p { margin:4px 0; font-size:18px; }
+
+.employees-table { width:100%; border-collapse:collapse; background:#fff; border-radius:8px; overflow:hidden; }
+.employees-table th, .employees-table td { padding:10px 12px; border-bottom:1px solid #e5e7eb; }
+.employees-table th { background:#f3f4f6; }
+.employees-table tbody tr:hover { background:#f1f5f9; cursor:pointer; }
+.emp-status-active { color:#16a34a; font-weight:600; }
+.emp-status-inactive { color:#ef4444; font-weight:600; }
+.emp-chart-box { margin-top:20px; }
+.emp-chart-box canvas { width:100% !important; height:260px !important; }
+
+/* Specific guard for the employees chart to avoid oversized rendering */
+#employeesChart { display: block; width: 100% !important; height: 260px !important; max-height: 320px; }
+@media (max-width: 768px) { #employeesChart { height: 200px !important; max-height: 260px; } }
 
 @media (max-width: 768px) {
   .sidebar {
@@ -422,287 +506,4 @@ a {
   .kpi-card, .chart-box {
     flex: 1 1 100%;
   }
-}
-/*departement css code
-*/
-/* =========================
-   DEPARTMENTS SECTION
-========================= */
-
-.dept-section {
-  padding: 25px;
-  animation: deptFade 0.4s ease-in-out;
-}
-
-/* Header */
-.dept-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 25px;
-}
-
-.dept-header h1 {
-  font-size: 26px;
-  color: #1e293b;
-  display: flex;
-  gap: 10px;
-  align-items: center;
-}
-
-.dept-header i {
-  color: #2563eb;
-}
-
-/* Button */
-.dept-add-btn {
-  background: linear-gradient(135deg, #2563eb, #1d4ed8);
-  color: #fff;
-  border: none;
-  padding: 10px 18px;
-  border-radius: 10px;
-  font-weight: 600;
-  cursor: pointer;
-  transition: all 0.3s ease;
-}
-
-.dept-add-btn:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 10px 25px rgba(37, 99, 235, 0.35);
-}
-
-/* KPI */
-.dept-kpi-wrapper {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
-  gap: 20px;
-  margin-bottom: 35px;
-}
-
-.dept-kpi-card {
-  display: flex;
-  gap: 16px;
-  padding: 22px;
-  border-radius: 18px;
-  color: #fff;
-  box-shadow: 0 10px 30px rgba(0,0,0,0.12);
-  transition: transform 0.3s ease;
-}
-
-.dept-kpi-card:hover {
-  transform: translateY(-6px);
-}
-
-.dept-kpi-card i {
-  font-size: 38px;
-}
-
-/* Gradients */
-.dept-gradient-primary {
-  background: linear-gradient(135deg, #4f46e5, #2563eb);
-}
-
-.dept-gradient-success {
-  background: linear-gradient(135deg, #059669, #10b981);
-}
-
-.dept-kpi-content h3 {
-  font-size: 16px;
-  font-weight: 500;
-}
-
-.dept-kpi-content p {
-  font-size: 32px;
-  font-weight: 700;
-  margin: 6px 0;
-}
-
-.dept-kpi-content small {
-  font-size: 13px;
-  opacity: 0.9;
-}
-
-/* Table */
-.dept-table-box {
-  background: #fff;
-  padding: 25px;
-  border-radius: 20px;
-  box-shadow: 0 10px 30px rgba(0,0,0,0.08);
-}
-
-.dept-table-box h2 {
-  margin-bottom: 18px;
-  font-size: 20px;
-  color: #1e293b;
-  display: flex;
-  gap: 8px;
-  align-items: center;
-}
-
-.dept-table {
-  width: 100%;
-  border-collapse: collapse;
-}
-
-.dept-table thead {
-  background: #f1f5f9;
-}
-
-.dept-table th,
-.dept-table td {
-  padding: 14px 16px;
-  font-size: 14px;
-  text-align: left;
-}
-
-.dept-table tbody tr {
-  border-bottom: 1px solid #e5e7eb;
-}
-
-.dept-table tbody tr:hover {
-  background: #f8fafc;
-}
-
-/* Status */
-.dept-status-active {
-  color: #16a34a;
-  font-weight: 600;
-}
-
-.dept-status-growing {
-  color: #d97706;
-  font-weight: 600;
-}
-
-.dept-status-active i,
-.dept-status-growing i {
-  margin-right: 6px;
-}
-
-/* Animation */
-@keyframes deptFade {
-  from {
-    opacity: 0;
-    transform: translateY(15px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-/* Responsive */
-@media (max-width: 768px) {
-  .dept-header {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 12px;
-  }
-}
-/* ---------- EMPLOYEES SECTION ---------- */
-.emp-section {
-  padding: 20px;
-  background-color: #f9fafb;
-  margin-bottom: 30px;
-  border-radius: 12px;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.05);
-}
-
-.emp-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 20px;
-}
-
-.emp-header h1 {
-  font-size: 1.8rem;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-
-.emp-add-btn {
-  background-color: #3b82f6;
-  color: white;
-  padding: 8px 14px;
-  border: none;
-  border-radius: 8px;
-  cursor: pointer;
-  font-weight: 600;
-}
-
-.emp-add-btn:hover { background-color: #2563eb; }
-
-.emp-kpi-wrapper {
-  display: flex;
-  gap: 20px;
-  margin-bottom: 20px;
-}
-
-.emp-kpi-card {
-  flex: 1;
-  display: flex;
-  align-items: center;
-  padding: 16px;
-  border-radius: 12px;
-  color: white;
-}
-
-.emp-gradient-primary { background: linear-gradient(135deg, #3b82f6, #60a5fa); }
-.emp-gradient-success { background: linear-gradient(135deg, #16a34a, #4ade80); }
-
-.emp-kpi-card i {
-  font-size: 2rem;
-  margin-right: 12px;
-}
-
-.emp-kpi-content h3 { margin:0; font-size:1rem; font-weight:600; }
-.emp-kpi-content p { font-size:1.4rem; margin:4px 0; }
-.emp-kpi-content small { font-size:0.8rem; color:#d1d5db; }
-
-.emp-table-box, .emp-chart-box {
-  margin-top: 20px;
-}
-
-.employees-table {
-  width: 100%;
-  border-collapse: collapse;
-  background: white;
-  border-radius: 8px;
-  overflow: hidden;
-}
-
-.employees-table th, .employees-table td {
-  padding: 12px 16px;
-  text-align: left;
-  border-bottom: 1px solid #e5e7eb;
-}
-
-.employees-table th {
-  background-color: #f3f4f6;
-}
-
-.employees-table tbody tr:hover {
-  background-color: #f1f5f9;
-  cursor: pointer;
-}
-
-.emp-status-active {
-  color: #16a34a;
-  font-weight: 600;
-}
-
-.emp-status-inactive {
-  color: #ef4444;
-  font-weight: 600;
-}
-
-.emp-chart-box {
-  margin-top: 30px;
-}
-
-.emp-chart-box canvas {
-  width: 100% !important;
-  height: 300px !important;
 }

@@ -1,3 +1,11 @@
+/*
+  Fichier: employees.js
+  Rôle: gestion des employés — stockage local, rendu du tableau des employés,
+  mise à jour du donut chart (actifs vs inactifs), bascule de statut et initialisation
+  des données de démonstration si nécessaire. Les commentaires inline ont été supprimés;
+  description générale ci-dessus.
+*/
+
 document.addEventListener('DOMContentLoaded', () => {
 
   const STORAGE_KEY = 'hrboard_employees';
@@ -64,9 +72,6 @@ document.addEventListener('DOMContentLoaded', () => {
     if(kpis.length>=2){ kpis[0].textContent = total; kpis[1].textContent = activeCount; }
   }
 
-  // Add employee: modal handled in global script; keep fallback function available but not auto-invoked
-
-  // If modal isn't available, fallback to prompts
   function openModalFallback(){
     const firstName = prompt('First Name');
     const lastName = prompt('Last Name');
@@ -79,7 +84,6 @@ document.addEventListener('DOMContentLoaded', () => {
     renderEmployees();
   }
 
-  // Listen for modal submissions
   window.addEventListener('modalSubmit', (e) => {
     const d = e.detail;
     if (!d || d.type !== 'employee') return;
@@ -90,7 +94,6 @@ document.addEventListener('DOMContentLoaded', () => {
     renderEmployees();
   });
 
-  // Toggle status by clicking on status cell
   document.querySelector('.employees-table tbody').addEventListener('click', e => {
     const td = e.target.closest('td');
     if(!td || td.cellIndex !== 3) return;
@@ -102,7 +105,6 @@ document.addEventListener('DOMContentLoaded', () => {
     renderEmployees();
   });
 
-  // Init demo employees only if none exist
   (function initDemoIfEmpty(){
     const existing = getStorage();
     if (existing.length > 0) { renderEmployees(); return; }

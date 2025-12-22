@@ -1,9 +1,16 @@
+/*
+  Fichier: script.js
+  Rôle: gestion de l'interface globale (sidebar, modal, navigation entre sections) et
+  dispatch d'événements `modalSubmit` pour que les modules spécifiques (interviews, tasks,
+  employees, departments) puissent réagir. Les commentaires inline ont été supprimés;
+  description générale ci-dessus.
+*/
+
 document.addEventListener('DOMContentLoaded', () => {
   const sidebarLinks = document.querySelectorAll('.sidebar a');
   const sidebar = document.getElementById('sidebar');
   const toggle = document.getElementById('sidebarToggle');
 
-  // restore collapsed state
   try {
     if (localStorage.getItem('hrboard_sidebar_collapsed') === '1') sidebar.classList.add('collapsed');
   } catch (e) {}
@@ -15,7 +22,6 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
-  // Modal handling
   const modal = document.getElementById('modal');
   const modalForm = document.getElementById('modalForm');
   const modalTitle = document.getElementById('modalTitle');
@@ -29,7 +35,6 @@ document.addEventListener('DOMContentLoaded', () => {
     const panel = modal.querySelector('.form-' + type);
     if (panel) {
       panel.style.display = 'grid';
-      // autofocus first input inside the panel
       const firstInput = panel.querySelector('input, select, textarea');
       if (firstInput) setTimeout(() => firstInput.focus(), 50);
     }
@@ -43,7 +48,6 @@ document.addEventListener('DOMContentLoaded', () => {
     modalForm.reset();
   }
 
-  // wire existing add buttons
   document.querySelectorAll('.add-btn').forEach(b => b.addEventListener('click', e => {
     const t = b.dataset.target;
     if (t) openModal(t);
@@ -90,8 +94,6 @@ function showSection(id) {
   document.querySelectorAll('.section').forEach(sec => sec.classList.remove('active'));
   const section = document.getElementById(id);
   if (section) section.classList.add('active');
-
-  // keep sidebar link in sync
   document.querySelectorAll('.sidebar a').forEach(l => l.classList.remove('active'));
   const link = document.querySelector(`.sidebar a[onclick="showSection('${id}')"]`);
   if (link) link.classList.add('active');

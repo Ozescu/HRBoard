@@ -1,3 +1,10 @@
+/*
+  Fichier: stats.js
+  Rôle: génération des vues statistiques et des graphiques récapitulatifs (headcount,
+  hiring funnel, department breakdown) et rendu du tableau de départements pour la
+  section Statistics. Met à jour les métriques à partir du localStorage.
+*/
+
 document.addEventListener('DOMContentLoaded', ()=>{
   const STORAGE_KEYS = {
     employees: 'hrboard_employees',
@@ -9,7 +16,6 @@ document.addEventListener('DOMContentLoaded', ()=>{
 
   function getStorage(key){ try { return JSON.parse(localStorage.getItem(key)) || []; } catch { return []; } }
 
-  // summary
   function renderSummary(){
     const employees = getStorage(STORAGE_KEYS.employees) || [];
     const departments = getStorage(STORAGE_KEYS.departments) || [];
@@ -21,7 +27,6 @@ document.addEventListener('DOMContentLoaded', ()=>{
     document.getElementById('statPendingTasks').textContent = tasks.filter(t=>t.status==='pending').length;
   }
 
-  // headcount trend (simple heuristic)
   let headcountChart = null;
   function renderHeadcount(){
     const employees = getStorage(STORAGE_KEYS.employees) || [];
@@ -37,7 +42,6 @@ document.addEventListener('DOMContentLoaded', ()=>{
     } else { headcountChart.data.labels = labels; headcountChart.data.datasets[0].data = data; headcountChart.update(); }
   }
 
-  // hiring funnel (interviews pending vs completed)
   let funnelChart = null;
   function renderFunnel(){
     const interviews = getStorage(STORAGE_KEYS.interviews) || [];
@@ -49,7 +53,6 @@ document.addEventListener('DOMContentLoaded', ()=>{
     else { funnelChart.data.datasets[0].data = data; funnelChart.update(); }
   }
 
-  // department breakdown
   let deptChart = null;
   function renderDeptBreakdown(){
     const deps = getStorage(STORAGE_KEYS.departments) || [];
@@ -58,7 +61,6 @@ document.addEventListener('DOMContentLoaded', ()=>{
     if (!deptChart){ const ctx = document.getElementById('deptBreakdown').getContext('2d'); deptChart = new Chart(ctx,{ type:'bar', data:{ labels, datasets:[{ label:'Employees', data, backgroundColor:'#10b981' }] }, options:{ responsive:true, maintainAspectRatio:false, scales:{ y:{ beginAtZero:true } } } }); }
     else { deptChart.data.labels = labels; deptChart.data.datasets[0].data = data; deptChart.update(); }
 
-    // render table
     const tbody = document.querySelector('#statsDeptTable tbody'); tbody.innerHTML = '';
     deps.forEach(d=>{ const tr = document.createElement('tr'); tr.innerHTML = `<td>${d.name}</td><td>${d.manager}</td><td>${d.employees}</td><td>${d.status}</td>`; tbody.appendChild(tr); });
   }
@@ -67,9 +69,7 @@ document.addEventListener('DOMContentLoaded', ()=>{
 
   document.getElementById('statsPeriod').addEventListener('change', renderHeadcount);
 
-  // refresh on modalSubmit
   window.addEventListener('modalSubmit', ()=>{ setTimeout(renderAll,150); });
 
-  // initial
   renderAll();
 });

@@ -1,4 +1,11 @@
 <!DOCTYPE html>
+<!--
+  Fichier: index.html
+  Rôle: Page principale de l'application HRBoard. Contient la structure HTML de la sidebar,
+  des sections (dashboard, employees, departments, stats), des tableaux et des conteneurs
+  pour les graphiques ainsi que le modal réutilisable pour ajouter des éléments.
+  Le code HTML ne contient plus de commentaires inline détaillés; explication globale ci-dessus.
+-->
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -251,7 +258,7 @@
   </div>
 
   <!-- Doughnut Chart -->
-  <div class="emp-chart-box">
+  <div class="emp-table-box">
     <h2><i class="fa-solid fa-chart-pie"></i> Employees Status</h2>
     <canvas id="employeesChart"></canvas>
   </div>
@@ -400,9 +407,8 @@
 
 <script src="script/stats.js"></script>
 
-<script src="script.js"></script>    
+<script src="script.js"></script>
 
-<!-- Modal for adding interview/task -->
 <div id="modal" class="modal" aria-hidden="true">
   <div class="modal-backdrop"></div>
   <div class="modal-content" role="dialog" aria-modal="true">
@@ -441,7 +447,6 @@
         <label>Location<input type="text" id="meetingLocation" name="meetingLocation" required></label>
       </div>
 
-      <!-- Employee form -->
       <div class="form-row form-employee">
         <label>First Name<input type="text" id="empFirstName" name="empFirstName" required></label>
         <label>Last Name<input type="text" id="empLastName" name="empLastName" required></label>
@@ -453,8 +458,6 @@
           </select>
         </label>
       </div>
-
-      <!-- Department form -->
       <div class="form-row form-department">
         <label>Department Name<input type="text" id="deptName" name="deptName" required></label>
         <label>Manager<input type="text" id="deptManager" name="deptManager" required></label>

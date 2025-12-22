@@ -1,6 +1,13 @@
+/*
+  Fichier: script/dashboard.js
+  Rôle: charts et rendu des listes globales (interviews, tasks) ainsi que
+  fonctions utilitaires pour mettre à jour les graphiques et les données
+  d'analyse (headcount, funnel, departments bar, KPI radar). Les commentaires
+  inline ont été supprimés; description générale ci-dessus.
+*/
+
 document.addEventListener('DOMContentLoaded', () => {
 
-  // ----- STORAGE KEYS -----
   const STORAGE_KEYS = {
     interviews: 'hrboard_interviews',
     tasks: 'hrboard_tasks',
@@ -19,7 +26,6 @@ document.addEventListener('DOMContentLoaded', () => {
     localStorage.setItem(key, JSON.stringify(data));
   }
 
-  // Listen for modal submissions for interviews, tasks, meetings
   window.addEventListener('modalSubmit', (e) => {
     const d = e.detail;
     if (!d) return;
@@ -41,7 +47,6 @@ document.addEventListener('DOMContentLoaded', () => {
       const meetings = getStorage(STORAGE_KEYS.meetings);
       meetings.push(payload);
       setStorage(STORAGE_KEYS.meetings, meetings);
-      // Append to table if present
       const tbody = document.getElementById('meetingsTableBody');
       if (tbody) {
         const tr = document.createElement('tr');
@@ -51,9 +56,6 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   });
 
-  // Departments rendering and demo data handled in script/departemets.js
-
-  // ----- INTERVIEWS -----
   const ctxInterview = document.getElementById('interviewChart').getContext('2d');
   let interviewChart = new Chart(ctxInterview, {
     type: 'doughnut',
@@ -94,7 +96,6 @@ document.addEventListener('DOMContentLoaded', () => {
     renderInterviews();
   });
 
-  // ----- TASKS -----
   const ctxTask = document.getElementById('taskChart').getContext('2d');
   let taskChart = new Chart(ctxTask, {
     type:'doughnut',
@@ -102,8 +103,6 @@ document.addEventListener('DOMContentLoaded', () => {
     options:{ responsive:true, maintainAspectRatio:false, plugins:{ legend:{ position:'bottom', labels:{ font:{size:11}, boxWidth:12 } } } }
   });
 
-  // ----- ADDITIONAL ANALYTICS CHARTS -----
-  // Employee growth (line)
   let employeeGrowthChart = null;
   const empGrowthCanvas = document.getElementById('employeeGrowthChart');
   if (empGrowthCanvas) {
@@ -111,7 +110,6 @@ document.addEventListener('DOMContentLoaded', () => {
     employeeGrowthChart = new Chart(ctxEmp, { type: 'line', data: { labels: [], datasets: [{ label: 'Employees', data: [], borderColor: '#3b82f6', backgroundColor: 'rgba(59,130,246,0.08)', tension: 0.3 }] }, options: { responsive:true, maintainAspectRatio:false, plugins:{ legend:{ display:false } } } });
   }
 
-  // Departments bar chart
   let departmentBarChart = null;
   const deptBarCanvas = document.getElementById('departmentBarChart');
   if (deptBarCanvas) {
@@ -119,7 +117,6 @@ document.addEventListener('DOMContentLoaded', () => {
     departmentBarChart = new Chart(ctxDeptBar, { type: 'bar', data: { labels: [], datasets: [{ label: 'Employees', data: [], backgroundColor: '#10b981' }] }, options: { responsive:true, maintainAspectRatio:false, plugins:{ legend:{ display:false } }, scales:{ y:{ beginAtZero:true } } } });
   }
 
-  // KPI radar
   let kpiRadarChart = null;
   const kpiCanvas = document.getElementById('kpiRadarChart');
   if (kpiCanvas) {
@@ -149,12 +146,10 @@ document.addEventListener('DOMContentLoaded', () => {
     taskChart.update();
   }
 
-  // ----- ADDITIONAL UPDATE HELPERS -----
   function updateEmployeeGrowth(){
     if (!employeeGrowthChart) return;
     const employees = getStorage(STORAGE_KEYS.employees) || [];
     const total = employees.length;
-    // build 6-point trend ending at total
     const points = 6;
     const data = [];
     for (let i=points-1;i>=0;i--){
@@ -201,10 +196,8 @@ document.addEventListener('DOMContentLoaded', () => {
     renderTasks();
   });
 
-  // ----- UTIL -----
-  function escapeHtml(s){ return String(s).replace(/[&<>"]/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c])); }
+  function escapeHtml(s){ return String(s).replace(/[&<>\"]/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c])); }
 
-  // ----- DEMO DATA -----
   function initDemoInterviewsTasks(){
     const departments = ['HR','IT','Marketing'];
     const interviewsDemo = [
@@ -222,7 +215,6 @@ document.addEventListener('DOMContentLoaded', () => {
     renderTasks();
   }
 
-  // Initialize demo interviews/tasks only when storage empty
   (function initDemoInterviewsTasksIfEmpty(){
     const interviews = getStorage(STORAGE_KEYS.interviews);
     const tasks = getStorage(STORAGE_KEYS.tasks);
@@ -234,10 +226,8 @@ document.addEventListener('DOMContentLoaded', () => {
     initDemoInterviewsTasks();
   })();
 
-  // update analytics initially
   updateAllAnalytics();
 
-  // update analytics on modal submits (employee/department/interview/task/meeting)
   window.addEventListener('modalSubmit', (e)=>{ if(!e.detail) return; const t=e.detail.type; if(['employee','department','interview','task','meeting'].includes(t)) setTimeout(updateAllAnalytics,150); });
 
 });
