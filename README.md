@@ -1,5 +1,10 @@
 # HRBoard
 
+*Informations de projet*  : 
+- groupe : 3IIR G4
+- Membres : Yahya Guirnaoui - Achraf Ouizzane - Rabie El Alami
+
+
 Description
 -
 HRBoard est une interface front-end légère pour la gestion RH (tableaux, KPI, graphiques).
